@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.24.0/min/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-streaming@1.8.0"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css"
+        integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js"
+        integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V"
+        crossorigin="anonymous"></script>
+    <title>Realtime Chart</title>
+</head>
+<style>
+    body {
+        font-family: Helvetica Neue, Arial, sans-serif;
+        text-align: center;
+    }
+
+    .wrapper {
+        max-width: 800px;
+        margin: 50px auto;
+    }
+
+    h1 {
+        font-weight: 200;
+        font-size: 3em;
+        margin: 0 0 0.1em 0;
+    }
+
+    h2 {
+        font-weight: 200;
+        font-size: 0.9em;
+        margin: 0 0 50px;
+        color: #999;
+    }
+
+    a {
+        margin-top: 50px;
+        display: block;
+        color: #3e95cd;
+    }
+
+    canvas {
+        display: inline-block !important;
+    }
+</style>
+
+<body>
+
+
+    <nav class="navbar navbar-light bg-light">
+        <a class="navbar-brand" href="/application">
+            <div class="logo-img">
+                <img src="/static/logo.png" width="30" height="30" class="d-inline-block align-top rounded" alt="">
+            </div>
+        </a>
+        <a class="navbar-brand" href="/map">
+            <div class="logo-img">
+                <img src="/static/map.png" width="30" height="30" class="d-inline-block align-top rounded" alt="">
+            </div>
+        </a>
+
+        <a class="navbar-brand" href="/chart">
+            <div class="logo-img">
+                <img src="/static/chart.png" width="30" height="30" class="d-inline-block align-top rounded" alt="">
+            </div>
+        </a>
+
+        <a class="navbar-brand" href="/setup">
+            <div class="logo-img">
+                <img src="/static/settings.png" width="30" height="30" class="d-inline-block align-top rounded" alt="">
+            </div>
+        </a>
+    </nav>
+
+
+    <div class="wrapper">
+        <canvas id="myChart" width="1600" height="900"></canvas>
+    </div>
+
+</body>
+
+<script>
+
+
+    function connect() {
+        api()
+    }
+
+    const temperature = []
+    const humidity = []
+    const moisture = []
+
+    function api() {
+        onRefresh()
+    }
+
+
+
+
+    function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function* stoppableMethod() {
+        // here is the implementation of the algorithm
+        // that we want to control
+        let i = 0;
+        while (true) {
+            // note that yield is inside infinite loop!
+            yield i;
+            i += 1;
+        }
+    }
+
+    const generatorInstance = stoppableMethod();
+
+    // tick generator and perform update of the indicator
+    const nextStep = () => {
+        api()
+    }
+
+    // state to keep track of the setInterval id
+    const state = {
+        timeoutId: 0,
+    }
+
+    // start method progression
+    const start = () => {
+        // do not start interval if there is already an interval
+        // running
+        if (state.timeoutId === 0) {
+            state.timeoutId = setInterval(() => nextStep(), 3000)
+
+        }
+    }
+
+    // clear timeout to stop auto porgress
+    const stop = () => {
+        clearTimeout(state.timeoutId);
+        state.timeoutId = 0;
+    }
+
+
+
+    var chartColors = {
+        red: 'rgb(255, 99, 132)',
+        orange: 'rgb(255, 159, 64)',
+        yellow: 'rgb(255, 205, 86)',
+        green: 'rgb(75, 192, 192)',
+        blue: 'rgb(54, 162, 235)',
+        purple: 'rgb(153, 102, 255)',
+        grey: 'rgb(201, 203, 207)'
+    };
+
+    // 1 OR -1
+    function randomScalingFactor() {
+        start()
+        //console.log(Math.random() > 0.5 ? 1.0 : -1.0) * Math.round(Math.random() * 100);
+        return (Math.random() > 0.5 ? 1.0 : -1.0) * Math.round(Math.random() * 100);
+    }
+
+    function onRefresh(chart) {
+
+        const port_no = "COM1";
+        const baudrate_no = 9600;
+        const buadrateno = parseInt(baudrate_no);
+        const finalVal = { "port": port_no, "baudrate": buadrateno };
+        console.log(finalVal)
+        var data = JSON.stringify(finalVal);
+        var xhr = new XMLHttpRequest();
+        xhr.withCredentials = true;
+        xhr.addEventListener("readystatechange", function () {
+            if (this.readyState === 4) {
+                //console.log(this.responseText);
+                const data = (this.responseText)
+                let arr = data.split(',');
+
+                //  temperature.push(arr.at(0))
+                //  humidity.push(arr.at(1))
+                //  moisture.push(arr.at(2))
+                console.log("temperature")
+                console.log(arr.at(0))
+                console.log("humidity")
+                console.log(arr.at(1))
+                console.log("moisture")
+                console.log(arr.at(2))
+
+                const x = (chart.config.data.datasets[0].data)
+                const y = (chart.config.data.datasets[1].data)
+                const z = (chart.config.data.datasets[2].data)
+
+                x.push({
+                    x: Date.now(),
+                    y: arr.at(0)
+                })
+                y.push({
+                    x: Date.now(),
+                    y: arr.at(1)
+                })
+                z.push({
+                    x: Date.now(),
+                    y: arr.at(2)
+                })
+            }
+        });
+        xhr.open("POST", "/get-data");
+        xhr.setRequestHeader("Content-Type", "application/json; charset=utf8");
+        xhr.setRequestHeader("Accept", "application/json");
+        xhr.send(data);
+    }
+
+    var color = Chart.helpers.color;
+    var config = {
+        type: 'line',
+        data: {
+            datasets: [{
+                label: 'Temperature',
+                backgroundColor: color(chartColors.red).alpha(0.5).rgbString(),
+                borderColor: chartColors.red,
+                fill: false,
+                // lineTension: 0,
+                // borderDash: [8, 4],
+                data: temperature
+            },
+            {
+                label: 'Humidity',
+                backgroundColor: color(chartColors.blue).alpha(0.5).rgbString(),
+                borderColor: chartColors.blue,
+                fill: false,
+                cubicInterpolationMode: 'monotone',
+                data: humidity
+            },
+            {
+                label: 'Moisture',
+                backgroundColor: color(chartColors.orange).alpha(0.5).rgbString(),
+                borderColor: chartColors.orange,
+                fill: false,
+                cubicInterpolationMode: 'monotone',
+                data: moisture
+            }]
+        },
+        options: {
+            title: {
+                display: true,
+                text: 'Realtime Chart Plotter'
+            },
+            scales: {
+                xAxes: [{
+                    type: 'realtime',
+                    realtime: {
+                        duration: 20000,
+                        refresh: 3000,
+                        delay: 2000,
+                        onRefresh: onRefresh
+                    }
+                }],
+                yAxes: [{
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'value'
+                    },
+                    ticks: {
+                        max: 100,
+                        min: -100
+                    }
+                }]
+            },
+            tooltips: {
+                mode: 'nearest',
+                intersect: false
+            },
+            hover: {
+                mode: 'nearest',
+                intersect: false
+            }
+        }
+    };
+
+    window.onload = function () {
+        var ctx = document.getElementById('myChart').getContext('2d');
+        window.myChart = new Chart(ctx, config);
+    };
+</script>
+
+</html>

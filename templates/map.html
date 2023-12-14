@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.1/socket.io.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+        crossorigin="anonymous"></script>
+    <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.0.1/js/toastr.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"
+        integrity="sha512-VEd+nq25CkR676O+pLBnDW09R7VQX9Mdiij052gVCp5yVH3jGtH70Ho/UUv4mJDsEdTvqRCFZg0NKGiojGnUCw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.0.1/css/toastr.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css"
+        integrity="sha512-vKMx8UnXk60zUwyUnUPM3HbQo8QfmNx7+ltw8Pm5zLusl1XIfwcxo8DbWCqMGKaWeNxWA8yrx5v3SaVpMvR3CA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <title>ARDUINO</title>
+</head>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+    }
+
+    #map {
+        width: 100%;
+        height: 100vh;
+    }
+
+    #nav {
+        background: fixed;
+        color: white;
+        background-color: chartreuse;
+    }
+
+    .card {
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+        transition: 0.3s;
+        width: 40%;
+    }
+
+    .card:hover {
+        box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
+    }
+
+    .container {
+        padding: 2px 16px;
+    }
+</style>
+
+
+<body onload="start()">
+    <nav class="navbar navbar-light bg-light">
+        <a class="navbar-brand" href="/application">
+            <div class="logo-img">
+                <img src="/static/logo.png" width="30" height="30" class="d-inline-block align-top rounded" alt="">
+            </div>
+        </a>
+        <a class="navbar-brand" href="/map">
+            <div class="logo-img">
+                <img src="/static/map.png" width="30" height="30" class="d-inline-block align-top rounded" alt="">
+            </div>
+        </a>
+
+        <a class="navbar-brand" href="/chart">
+            <div class="logo-img">
+                <img src="/static/chart.png" width="30" height="30" class="d-inline-block align-top rounded" alt="">
+            </div>
+        </a>
+
+        <a class="navbar-brand" href="/setup">
+            <div class="logo-img">
+                <img src="/static/settings.png" width="30" height="30" class="d-inline-block align-top rounded" alt="">
+            </div>
+        </a>
+    </nav>
+
+    <!-- <section>
+        <div class="container">
+
+         <div class="row">
+            <div class="col-md-4">
+                <label for="lat">Latitude</label>
+                <input  class="form-control" type="text" id="lat">
+            </div>
+
+            <div class="col-md-4">
+                <label for="lng">Longitude</label>
+                <input class="form-control" type="text" id="lng">
+            </div>
+
+            <div class="col-md-4">
+                <br>
+                <button class="btn btn-primary" >Add Location</button>
+            </div>
+         </div>
+
+        </div>
+    </section> -->
+
+    <div id="map"></div>
+
+    <!-- leaflet js  -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script>
+
+
+        function connect() {
+            api()
+        }
+
+        const temperature = []
+        const humidity = []
+        const moisture = []
+
+        function api() {
+
+            const finalVal = { "port": "", "baudrate": "" };
+            console.log(finalVal)
+            var data = JSON.stringify(finalVal);
+            var xhr = new XMLHttpRequest();
+            xhr.withCredentials = true;
+            xhr.addEventListener("readystatechange", function () {
+                if (this.readyState === 4)
+                    console.log(this.responseText);
+                const data = (this.responseText)
+                let arr = data.split(',');
+
+                temperature.push(arr.at(0))
+                humidity.push(arr.at(1))
+                moisture.push(arr.at(2))
+                document.getElementById("temperature").innerHTML = arr.at(0);
+                document.getElementById("humidity").innerHTML = arr.at(1);
+                document.getElementById("moisture").innerHTML = arr.at(2);
+                console.log(temperature);
+                console.log(humidity);
+                console.log(moisture);
+
+
+
+
+            });
+            xhr.open("POST", "/get-data");
+            xhr.setRequestHeader("Content-Type", "application/json; charset=utf8");
+            xhr.setRequestHeader("Accept", "application/json");
+            xhr.send(data);
+        }
+
+
+
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function* stoppableMethod() {
+            // here is the implementation of the algorithm
+            // that we want to control
+            let i = 0;
+            while (true) {
+                // note that yield is inside infinite loop!
+                yield i;
+                i += 1;
+            }
+        }
+
+        const generatorInstance = stoppableMethod();
+
+        // tick generator and perform update of the indicator
+        const nextStep = () => {
+            api()
+        }
+
+        // state to keep track of the setInterval id
+        const state = {
+            timeoutId: 0,
+        }
+
+        // start method progression
+        const start = () => {
+            // do not start interval if there is already an interval
+            // running
+            if (state.timeoutId === 0) {
+                state.timeoutId = setInterval(() => nextStep(), 3000)
+
+            }
+        }
+
+        // clear timeout to stop auto porgress
+        const stop = () => {
+            clearTimeout(state.timeoutId);
+            state.timeoutId = 0;
+        }
+
+
+
+
+        // Creating map options
+        var mapOptions = {
+            center: [12.600000,37.466667],
+            zoom: 10
+        }
+        // Creating a map object
+        var map = new L.map('map', mapOptions);
+
+        // Creating a Layer object
+        var layer = new L.TileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+
+        // Adding layer to the map
+        map.addLayer(layer);
+
+        // Creating a marker
+        var marker = L.marker([ 12.600000,37.466667 ]);
+
+        // Adding marker to the map
+        marker.addTo(map);
+        const x = 10
+
+        // Adding popup to the marker
+        marker.bindPopup(`
+        <h2>Realtime MAP DATA</h2>
+        <hr>
+        <br>
+        <p>Temperature</p>
+        <p id="temperature"></p>
+        <br>
+        <p>Humidity</p>
+        <p id="humidity"></p>
+        <br>
+        <p>Moisture</p>
+        <p id="moisture"></p>
+        <hr>
+
+        `).openPopup();
+        marker.addTo(map); // Adding marker to the map
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+        crossorigin="anonymous"></script>
+    <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.0.1/js/toastr.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"
+        integrity="sha512-VEd+nq25CkR676O+pLBnDW09R7VQX9Mdiij052gVCp5yVH3jGtH70Ho/UUv4mJDsEdTvqRCFZg0NKGiojGnUCw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.0.1/css/toastr.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css"
+        integrity="sha512-vKMx8UnXk60zUwyUnUPM3HbQo8QfmNx7+ltw8Pm5zLusl1XIfwcxo8DbWCqMGKaWeNxWA8yrx5v3SaVpMvR3CA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.24.0/min/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-streaming@1.8.0"></script>
+
+    <title>ARDUINO</title>
+    <link rel="icon" type="image/x-icon" href="/static/logo.ico">
+    <style>
+        .logo-img {
+            padding-left: 10px;
+        }
+
+        .indicator {
+            background-color: red;
+            height: 25px;
+            width: 25px;
+            border-radius: 50px;
+            padding-top: 5px;
+            margin-top: 5px;
+        }
+
+        .wrapper {
+            max-width: 800px;
+            margin: 50px auto;
+        }
+
+        canvas {
+            display: inline-block !important;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar navbar-light bg-light">
+        <a class="navbar-brand" href="/application">
+            <div class="logo-img">
+                <img src="/static/logo.png" width="30" height="30" class="d-inline-block align-top rounded" alt="">
+            </div>
+        </a>
+        <a class="navbar-brand" href="/map">
+            <div class="logo-img">
+                <img src="/static/map.png" width="30" height="30" class="d-inline-block align-top rounded" alt="">
+            </div>
+        </a>
+
+        <a class="navbar-brand" href="/chart">
+            <div class="logo-img">
+                <img src="/static/chart.png" width="30" height="30" class="d-inline-block align-top rounded" alt="">
+            </div>
+        </a>
+
+        <a class="navbar-brand" href="/setup">
+            <div class="logo-img">
+                <img src="/static/settings.png" width="30" height="30" class="d-inline-block align-top rounded" alt="">
+            </div>
+        </a>
+    </nav>
+
+
+    <br>
+    <hr>
+    <br>
+
+    <section>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <p>PORT</p>
+                    <p id="port_no">{{ session['port'] }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p>BAUDRATE</p>
+                    <p id="baudrate_no">{{ session['baudrate'] }}</p>
+                </div>
+            </div>
+
+
+        </div>
+    </section>
+
+
+
+    <!-- <section>
+        <div class="container text-center">
+            <div class="row">
+                <div class="col-md-4">
+                    <button type="button" class="btn btn-primary" onclick="start()">START</button>
+                </div>
+                <div class="col-md-4">
+                    <button type="button" class="btn btn-primary" onclick="stop()">PAUSE</button>
+                </div>
+                <div class="col-md-4">
+                    <button type="button" class="btn btn-primary" onclick="location.reload()">RELOAD</button>
+                </div>
+            </div>
+        </div>
+    </section> -->
+
+    <br>
+    <hr>
+    <br>
+
+    <section>
+        <div class="container">
+            <div class="text-center">
+                <div class="row">
+                    <div class="col-md-4">
+                        <p>Temperature</p>
+                        <p id="temperature"></p>
+                    </div>
+                    <div class="col-md-4">
+                        <p>Humidity</p>
+                        <p id="humidity"></p>
+                    </div>
+                    <div class="col-md-4">
+                        <p>Moisture</p>
+                        <p id="moisture"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <section>
+        <div class="container">
+            <div class="wrapper">
+                <canvas id="myChart" width="1600" height="900"></canvas>
+            </div>
+        </div>
+    </section>
+
+    <br>
+    <hr>
+    <br>
+
+    <section>
+        <div class="container text-center">
+            <div class="row">
+                <div class="col-md-6">
+                    <button  onclick="start_motor()" type="button" class="btn btn-primary">START MOTER</button>
+                </div>
+                <div class="col-md-6">
+                    <button onclick="stop_motor()" type="button" class="btn btn-primary">STOP MOTER</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+
+    <br>
+    <hr>
+    <br>
+
+</body>
+<script>
+  function start_motor(){
+
+    console.log("LOW")
+
+    const finalVal = { "data": "HIGH"};
+    console.log(finalVal)
+    var data = JSON.stringify(finalVal);
+    var xhr = new XMLHttpRequest();
+    xhr.withCredentials = true;
+    xhr.addEventListener("readystatechange", function () {
+        if (this.readyState === 4) {
+            //console.log(this.responseText);
+            const data = (this.responseText)
+
+        }
+    });
+    xhr.open("POST", "/start-motor");
+    xhr.setRequestHeader("Content-Type", "application/json; charset=utf8");
+    xhr.setRequestHeader("Accept", "application/json");
+    xhr.send(data);
+  }
+
+
+  function stop_motor(){
+
+    console.log("LOW")
+
+    const finalVal = { "data": "LOW"};
+    console.log(finalVal)
+    var data = JSON.stringify(finalVal);
+    var xhr = new XMLHttpRequest();
+    xhr.withCredentials = true;
+    xhr.addEventListener("readystatechange", function () {
+        if (this.readyState === 4) {
+            //console.log(this.responseText);
+            const data = (this.responseText)
+
+        }
+    });
+    xhr.open("POST", "/stop-motor");
+    xhr.setRequestHeader("Content-Type", "application/json; charset=utf8");
+    xhr.setRequestHeader("Accept", "application/json");
+    xhr.send(data);
+    
+  }
+
+    function displayInfoToaster() {
+        toastr.options.timeOut = 1500; // 1.5s 
+        toastr.info('info messages');
+    }
+
+    function displaySuccessToaster() {
+        toastr.options.timeOut = 1500; // 1.5s 
+        toastr.success('Success messages');
+    }
+
+    function displayErrorToaster() {
+        toastr.options.timeOut = 1500; // 1.5s 
+        toastr.error('errors messages');
+    }
+
+    function displayWarningToaster() {
+        toastr.options.timeOut = 1500; // 1.5s 
+        toastr.warning('warning messages');
+    }
+
+
+    // Controls
+
+
+    // Test Function
+
+    function connect() {
+        api()
+    }
+
+    const temperature = []
+    const humidity = []
+    const moisture = []
+
+
+
+
+    function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function* stoppableMethod() {
+        // here is the implementation of the algorithm
+        // that we want to control
+        let i = 0;
+        while (true) {
+            // note that yield is inside infinite loop!
+            yield i;
+            i += 1;
+        }
+    }
+
+    const generatorInstance = stoppableMethod();
+
+    // tick generator and perform update of the indicator
+    const nextStep = () => {
+        api()
+    }
+
+    // state to keep track of the setInterval id
+    const state = {
+        timeoutId: 0,
+    }
+
+    // start method progression
+    const start = () => {
+        // do not start interval if there is already an interval
+        // running
+        if (state.timeoutId === 0) {
+            state.timeoutId = setInterval(() => nextStep(), 3000)
+
+        }
+    }
+
+    // clear timeout to stop auto porgress
+    const stop = () => {
+        clearTimeout(state.timeoutId);
+        state.timeoutId = 0;
+    }
+
+
+
+    var chartColors = {
+        red: 'rgb(255, 99, 132)',
+        orange: 'rgb(255, 159, 64)',
+        yellow: 'rgb(255, 205, 86)',
+        green: 'rgb(75, 192, 192)',
+        blue: 'rgb(54, 162, 235)',
+        purple: 'rgb(153, 102, 255)',
+        grey: 'rgb(201, 203, 207)'
+    };
+
+    function onRefresh(chart) {
+        const port_no = document.getElementById('port_no').value;
+        const baudrate_no = document.getElementById('baudrate_no').value;
+        const buadrateno = parseInt(baudrate_no);
+        const finalVal = { "port": "", "baudrate": "" };
+        console.log(finalVal)
+        var data = JSON.stringify(finalVal);
+        var xhr = new XMLHttpRequest();
+        xhr.withCredentials = true;
+        xhr.addEventListener("readystatechange", function () {
+            if (this.readyState === 4) {
+                //console.log(this.responseText);
+                const data = (this.responseText)
+                console.log("-----------------")
+                console.log(data)
+                let arr = data.split(',');
+
+                //  temperature.push(arr.at(0))
+                //  humidity.push(arr.at(1))
+                //  moisture.push(arr.at(2))
+                console.log("temperature")
+                console.log(arr.at(0))
+                console.log("humidity")
+                console.log(arr.at(1))
+                console.log("moisture")
+                console.log(arr.at(2))
+
+                document.getElementById("temperature").innerHTML = arr.at(0);
+                document.getElementById("humidity").innerHTML = arr.at(1);
+                document.getElementById("moisture").innerHTML = arr.at(2);
+
+                const x = (chart.config.data.datasets[0].data)
+                const y = (chart.config.data.datasets[1].data)
+                const z = (chart.config.data.datasets[2].data)
+
+                x.push({
+                    x: Date.now(),
+                    y: arr.at(0)
+                })
+                y.push({
+                    x: Date.now(),
+                    y: arr.at(1)
+                })
+                z.push({
+                    x: Date.now(),
+                    y: arr.at(2)
+                })
+            }
+        });
+        xhr.open("POST", "/get-data");
+        xhr.setRequestHeader("Content-Type", "application/json; charset=utf8");
+        xhr.setRequestHeader("Accept", "application/json");
+        xhr.send(data);
+    }
+
+    var color = Chart.helpers.color;
+    var config = {
+        type: 'line',
+        data: {
+            datasets: [{
+                label: 'Temperature',
+                backgroundColor: color(chartColors.red).alpha(0.5).rgbString(),
+                borderColor: chartColors.red,
+                fill: false,
+                // lineTension: 0,
+                // borderDash: [8, 4],
+                data: temperature
+            },
+            {
+                label: 'Humidity',
+                backgroundColor: color(chartColors.blue).alpha(0.5).rgbString(),
+                borderColor: chartColors.blue,
+                fill: false,
+                cubicInterpolationMode: 'monotone',
+                data: humidity
+            },
+            {
+                label: 'Moisture',
+                backgroundColor: color(chartColors.orange).alpha(0.5).rgbString(),
+                borderColor: chartColors.orange,
+                fill: false,
+                cubicInterpolationMode: 'monotone',
+                data: moisture
+            }]
+        },
+        options: {
+            title: {
+                display: true,
+                text: 'Realtime Chart Plotter'
+            },
+            scales: {
+                xAxes: [{
+                    type: 'realtime',
+                    realtime: {
+                        duration: 20000,
+                        refresh: 3000,
+                        delay: 2000,
+                        onRefresh: onRefresh
+                    }
+                }],
+                yAxes: [{
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'value'
+                    },
+                    ticks: {
+                        max: 100,
+                        min: -100
+                    }
+                }]
+            },
+            tooltips: {
+                mode: 'nearest',
+                intersect: false
+            },
+            hover: {
+                mode: 'nearest',
+                intersect: false
+            }
+        }
+    };
+
+
+
+
+    window.onload = function () {
+        var ctx = document.getElementById('myChart').getContext('2d');
+        window.myChart = new Chart(ctx, config);
+    };
+
+</script>
+
+</html>
